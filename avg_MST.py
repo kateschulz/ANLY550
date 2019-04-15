@@ -10,6 +10,7 @@ import sys
 from math import sqrt
 import itertools
 import random
+from functools import lru_cache
 
 
 #Compute 2D euclidean distance
@@ -74,7 +75,70 @@ def create_graph(edges):
     graph = [list(i) for i in tuples]
     return(graph)
 
-# Run Prim's algorithm on a set of V vertices and graph G with vertice pairs
+############## CACHE create_edge_weights ###############
+@lru_cache(maxsize=100000)
+
+# compute edge weigths based on n and dim
+def create_edge_weights(n, dim):
+    # Case dim = 0
+    if dim == 0:
+        #create n distinct vertices 
+        vertices = random.sample(range(0, n), n) 
+        
+        #create pairs of vertices for complete graph
+        vertex_pairs = list(itertools.combinations(vertices,2))
+        list1, list2 = zip(*vertex_pairs)
+        
+        # n choose 2 edge weights from [0,1]
+        edge_weights = []
+        for j in range(len(vertex_pairs)):
+            edge_weights.append(random.uniform(0, 1))
+                
+        
+    elif (dim == 2 or dim == 3 or dim == 4):
+        #create n*dim points from [0,1]
+        vertex_points = []
+        for j in range(n*dim):
+            vertex_points.append(random.uniform(0, 1))
+
+        # pair up points and combine pairs for dim
+        vertex_iter = [iter(vertex_points)] * dim 
+        vertices = zip(*vertex_iter)
+        vertex_pairs = list(itertools.combinations(vertices, 2))
+            
+        # Case dim = 2
+        if dim == 2:
+            #compute 2D euclidean distance
+            edge_weights = []
+            for j in range(len(vertex_pairs)):
+                edge_weights.append(two_d_dist(vertex_pairs[j][0][0],vertex_pairs[j][0][1],
+                                               vertex_pairs[j][1][0],vertex_pairs[j][1][1]))
+            
+        # Case dim = 3
+        elif dim == 3: 
+            #compute 3D euclidean distance
+            edge_weights = []
+            for j in range(len(vertex_pairs)):
+                edge_weights.append(three_d_dist(vertex_pairs[j][0][0],vertex_pairs[j][0][1],
+                                                 vertex_pairs[j][0][2], vertex_pairs[j][1][0],
+                                                 vertex_pairs[j][1][1], vertex_pairs[j][1][2]))
+        # Case dim = 4
+        elif dim == 4:
+            #compute 4D euclidean distance
+            edge_weights = []
+            for j in range(len(vertex_pairs)):
+                edge_weights.append(four_d_dist(vertex_pairs[j][0][0],vertex_pairs[j][0][1],
+                                                vertex_pairs[j][0][2], vertex_pairs[j][0][3],
+                                                vertex_pairs[j][1][0],vertex_pairs[j][1][1], 
+                                                vertex_pairs[j][1][2], vertex_pairs[j][1][3]))
+                
+        # Only accept dim input of 0, 2, 3, or 4
+        else:
+            return str("Please enter a dimension of 0, 2, 3, or 4!")
+    
+    return edge_weights
+ 
+# Run Prim's algorithm on a set of V vertices and graph G with vertex pairs
 # and edge weights
 def prims(V, G):
   
@@ -118,72 +182,19 @@ def prims(V, G):
     min_edge = [None,None,float('inf')]
     
   return MST
+       
+############## CACHE avg_MST ###############
+@lru_cache(maxsize=100000)
 
-from cachetools import cached, TTLCache  
-cache = TTLCache(maxsize=10000, ttl = 10)  
-@cached(cache)
-
-# Run Prim's algorithm to compute the average MST weight from n vertices in a given 
-# dimension on a given number of trials 
-def avg_MST(n, dim, num_trials): 
+# Run Prim's algorithm to compute the MST weight from n vertices in a given 
+# dimension over a given number of trials
+def avg_MST(n, dim, num_trials):
     
     #compute average weight over trials
-    avg_weight = []
+    weight = []
     for i in range(num_trials):
-        
-        # Case dim = 0
-        if dim == 0:
-            #create n distinct vertices 
-            vertices = random.sample(range(0, n), n) 
-        
-            #create pairs of vertices for complete graph
-            vertex_pairs = list(itertools.combinations(vertices,2))
-            list1, list2 = zip(*vertex_pairs)
-        
-            # n choose 2 edge weights from [0,1]
-            edge_weights = []
-            for j in range(len(vertex_pairs)):
-                edge_weights.append(random.uniform(0, 1))    
-                
-        
-        elif (dim == 2 or dim == 3 or dim == 4):
-            #create n*dim points from [0,1]
-            vertex_points = []
-            for j in range(n*dim):
-                vertex_points.append(random.uniform(0, 1))
-
-            # pair up points and combine pairs for dim
-            vertex_iter = [iter(vertex_points)] * dim 
-            vertices = zip(*vertex_iter)
-            vertex_pairs = list(itertools.combinations(vertices, 2))
-            
-            # Case dim = 2
-            if dim == 2:
-                #compute 2D euclidean distance
-                edge_weights = []
-                for j in range(len(vertex_pairs)):
-                    edge_weights.append(two_d_dist(vertex_pairs[j][0][0],vertex_pairs[j][0][1],
-                                                   vertex_pairs[j][1][0],vertex_pairs[j][1][1]))
-            # Case dim = 3
-            elif dim == 3: 
-                #compute 3D euclidean distance
-                edge_weights = []
-                for j in range(len(vertex_pairs)):
-                    edge_weights.append(three_d_dist(vertex_pairs[j][0][0],vertex_pairs[j][0][1],
-                                                     vertex_pairs[j][0][2], vertex_pairs[j][1][0],
-                                                     vertex_pairs[j][1][1], vertex_pairs[j][1][2]))
-            # Case dim = 4
-            elif dim == 4:
-                #compute 4D euclidean distance
-                edge_weights = []
-                for j in range(len(vertex_pairs)):
-                    edge_weights.append(four_d_dist(vertex_pairs[j][0][0],vertex_pairs[j][0][1],
-                                                     vertex_pairs[j][0][2], vertex_pairs[j][0][3],
-                                                     vertex_pairs[j][1][0],vertex_pairs[j][1][1], 
-                                                     vertex_pairs[j][1][2], vertex_pairs[j][1][3]))
-        # Only accept dim input of 0, 2, 3, or 4
-        else:
-            return str("Please enter a dimension of 0, 2, 3, or 4!")
+    #compute edge weights
+        edge_weights = create_edge_weights(n, dim)
         
         # for n sufficiently large, prune the number of edges
         if n >= (2 ** (7)):
@@ -194,22 +205,18 @@ def avg_MST(n, dim, num_trials):
             for item in edge_weights:
                 if item >= k_n:
                     edge_weights.remove(item)
-        
+    
         # create graph         
         graph = create_graph(edge_weights)
 
         # run Prim's algorithm and compute MST weight
         path_weight = prims(len(edge_weights), graph)
-        weight = 0
         for i in range(len(path_weight)):
-            weight += path_weight[i][2]
-            avg_weight.append(weight)
-
+            weight.append(path_weight[i][2])
+               
     #Compute average weight over all trials
-    return sum(avg_weight)/len(avg_weight)
+    return sum(weight)/len(weight)
 
-# Run your program for n = 16; 32; 64; 128; 256; 512; 1024; 2048; 4096; 8192; 16384
-# run at least 5 times for average
     
 # Read std.in parameters
 n = int(sys.argv[2])
