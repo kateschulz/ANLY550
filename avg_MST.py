@@ -120,7 +120,7 @@ def prims(V, G):
   return MST
 
 from cachetools import cached, TTLCache  
-cache = TTLCache(maxsize=1000)  
+cache = TTLCache(maxsize=10000, ttl = 1000, timer=time.monotonic, getsizeof=None)  
 @cached(cache)
 
 # Run Prim's algorithm to compute the average MST weight from n vertices in a given 
