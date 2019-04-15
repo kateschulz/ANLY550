@@ -119,9 +119,12 @@ def prims(V, G):
     
   return MST
 
-from cachetools import cached, TTLCache  
-cache = TTLCache(maxsize=100000, ttl = 10)  
-@cached(cache)
+#from cachetools import cached, TTLCache  
+#cache = TTLCache(maxsize=100000, ttl = 10)  
+#@cached(cache)
+
+from functools import lru_cache
+@lru_cache(maxsize=10000)
 
 # Run Prim's algorithm to compute the average MST weight from n vertices in a given 
 # dimension on a given number of trials 
