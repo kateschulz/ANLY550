@@ -211,12 +211,12 @@ def avg_MST(n, dim, num_trials):
 
         # run Prim's algorithm and compute MST weight
         path_weight = prims(len(edge_weights), graph)
+        print(path_weight)
         for i in range(len(path_weight)):
             weight.append(path_weight[i][2])
-               
+        
     #Compute average weight over all trials
-    return sum(weight)/len(weight)
-
+    return sum(weight)/num_trials
     
 # Read std.in parameters
 n = int(sys.argv[2])
