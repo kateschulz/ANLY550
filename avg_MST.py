@@ -64,19 +64,20 @@ def create_adj_matrix(V, G):
 # Create graph with list of edge weights as input
 def create_graph(edges):
     #create n distinct vertices for edge weights
-    new_vertices = random.sample(range(0, len(edges)), len(edges)) 
-    
+    new_vertices = random.sample(range(0, n), n) 
+
     #create tuples of vertices for graph
     new_vertex_pairs = list(itertools.combinations(new_vertices,2))
     list1, list2 = zip(*new_vertex_pairs)
-        
+    
     # create graph from vertices and edge weights
     tuples = list(zip(list1,list2,edges))
     graph = [list(i) for i in tuples]
-    return(graph)
+    
+    return graph
 
 ############## CACHE create_edge_weights ###############
-@lru_cache(maxsize=100000)
+@lru_cache(maxsize=10000000)
 
 # compute edge weigths based on n and dim
 def create_edge_weights(n, dim):
@@ -180,11 +181,11 @@ def prims(V, G):
     # start at new vertex and reset min edge
     vertex = min_edge[1]
     min_edge = [None,None,float('inf')]
-    
+  
   return MST
-       
+      
 ############## CACHE avg_MST ###############
-@lru_cache(maxsize=100000)
+@lru_cache(maxsize=10000000)
 
 # Run Prim's algorithm to compute the MST weight from n vertices in a given 
 # dimension over a given number of trials
@@ -210,8 +211,7 @@ def avg_MST(n, dim, num_trials):
         graph = create_graph(edge_weights)
 
         # run Prim's algorithm and compute MST weight
-        path_weight = prims(len(edge_weights), graph)
-        print(path_weight)
+        path_weight = prims(n, graph)
         for i in range(len(path_weight)):
             weight.append(path_weight[i][2])
         
