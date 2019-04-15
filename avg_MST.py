@@ -119,7 +119,11 @@ def prims(V, G):
     
   return MST
 
-from functools import lru_cache
+#from functools import lru_cache
+try:
+    from functools import lru_cache
+except ImportError:
+    from backports.functools_lru_cache import lru_cache
 @lru_cache(maxsize=10000)
 # Run Prim's algorithm to compute the average MST weight from n vertices in a given 
 # dimension on a given number of trials 
