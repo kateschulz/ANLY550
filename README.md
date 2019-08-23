@@ -1,4 +1,4 @@
-# ANLY550
+# ANLY550: Structures and Algorithms
 
 This repo contains two functions:
 * avg_MST.py : Runs Prim's algorithm using an adjacency matrix. Computes average MST weight for given number of trials.
